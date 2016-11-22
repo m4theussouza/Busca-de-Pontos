@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 // declaracao do TAD TPonto
 typedef struct{
@@ -20,15 +21,17 @@ void Desaloca( TListaPonto *lista);
 void insereFinal( TListaPonto *lista, TPonto p);
 void imprimeListaPontos( TListaPonto *lista );
 void insereDadaPosicao(TListaPonto *lista, TPonto p, int posicao);
-void removeDadaPosicao(TListaPonto *lista, TPonto p, int posicao);
+void removeDadaPosicao(TListaPonto *lista, int posicao);
 void pontosAleatorios(TListaPonto *lista);
-TPonto distanciaEntrePontos(TListaPonto *lista, TPonto p);
+float pitagoras(TPonto, TPonto);
+void distanciaEntrePontos(TListaPonto*,TPonto,int);
+
 
 int main(void){
     // declarando Lista de Pontos;
     TListaPonto *lista;
     char opc;
-    int i, posicao;
+    int i, posicao, kpontos;
 
     lista = Init( 10 ); //cria um vetor de pontos com 1000 posicoes
 
@@ -39,7 +42,7 @@ int main(void){
                "3 - Ver Quantidade de Pontos Na Lista\n"
                "4 - Remover Na Posicao Indicada\n"
                "5 - Para Adicionar Pontos Aleatorios de X e Y menores que 1000\n"
-               "6 - Informe o Indice "
+               "6 - Achar pontos mais próximos\n"
                "7 - sair\n");
         opc = getchar();
 
@@ -67,19 +70,27 @@ int main(void){
             p.y = 0;
             printf("Digite em qual posicao deseja Remover a Coordenada: ");
             scanf("%d", &posicao);
-            removeDadaPosicao(lista,p,posicao);
+            removeDadaPosicao(lista,posicao);
         }
         if( opc == '5'){
             pontosAleatorios(lista);
         }
-        if(opc == '6'){
+        if( opc == '6'){
             TPonto p;
-            printf("Digite Qual Ponto Deseja Usar Como Base (separados por virgula): ");
+            int kpontos;
+            printf("Qual ponto deseja calcular? separe por virgula\n Digite Aqui: ");
             scanf("%d,%d", &p.x, &p.y);
-            distanciaEntrePontos(lista,p);
-        }
+            printf("Quantos pontos deseja ?\n Digite Aqui: ");
+            scanf("%d", &kpontos);
+            distanciaEntrePontos(lista,p,kpontos);
+
+        }  
+        getchar();
         imprimeListaPontos( lista );
-    }while (opc != '7');
+        
+    }while (opc != '8');
+
+    getchar();
 
     printf("\nfim do programa\n");
     // libera a lista de pontos
@@ -91,6 +102,7 @@ int main(void){
 TListaPonto *Init( int N ){
 
     TListaPonto *lista;
+
 
     lista = (TListaPonto*) calloc(1,sizeof(TListaPonto));
     lista->qtdAtual = 0;
@@ -121,12 +133,12 @@ void insereFinal( TListaPonto *lista, TPonto p){
 
     }
 
-}
+} 
 // imprime a lista de pontos
 void imprimeListaPontos( TListaPonto *lista ){
     int i;
     printf("\n");
-    for(i=0;i<lista->maximo;i++)
+    for(i=0;i<lista->qtdAtual;i++)
         printf("Coordenada Da Posicao %d: (%d,%d)\n ",i, lista->elementos[i].x,lista->elementos[i].y);
 }  
 
@@ -139,34 +151,53 @@ void insereDadaPosicao(TListaPonto *lista, TPonto p, int posicao){
     }
 }
 
-void removeDadaPosicao(TListaPonto *lista, TPonto p, int posicao){
-    if(lista->elementos[posicao].x != 0 && lista->elementos[posicao].y != 0){
-            lista->elementos[posicao] = p;
+void removeDadaPosicao(TListaPonto *lista, int posicao){
+        // lista->elementos[posicao] = p;
+    for (int i = posicao; i < lista->qtdAtual; i++){
+
+       lista->elementos[i].x = lista->elementos[i+1].x;
+       lista->elementos[i].y = lista->elementos[i+1].y;
     }
-    else{
-        printf("Posicao ja esta vazia\n");
-    }
+
+    lista->qtdAtual--;
+
+    imprimeListaPontos(lista);
+ 
 }
 
 void pontosAleatorios(TListaPonto *lista){
         int i;
         srand((unsigned)time(NULL));
-        for(i=0 ; i < lista->maximo; i++){
+        for(i=lista->qtdAtual; i < lista->maximo; i++){
         lista->elementos[i].x = rand() % 1000;
         lista->elementos[i].y = rand() % 1000;
         (lista->qtdAtual)++;
         }
 }
 
-TPonto distanciaEntrePontos(TListaPonto *lista, TPonto p){
-    int i;
-    int P1, P2;
-    
-    for (i=0;i<lista->qtdAtual;i++){
-        P1 = p.x-lista->elementos[i].x;
-        P2 = p.y-lista->elementos[i].y;
-        printf(" %d %d\n",P1, P2 );
-    }
+void distanciaEntrePontos(TListaPonto *lista, TPonto p, int kpontos){
+    int i; 
 
-    //return distanciaEntrePontos(lista,p)
+    TListaPonto *vetorDistancia;
+     
+    vetorDistancia = Init(kpontos);
+    
+    float distancia;
+
+    for(i = 0; i < lista->qtdAtual; i++)
+    
+    vetorDistancia[i] = pitagoras(p,lista->elementos[i]);
+
+    printf("Distancia  = %lf\n", distancia);
+}
+    
+
+float pitagoras(TPonto p1, TPonto p2){
+    
+    float distancia;
+    
+    distancia = sqrt( pow( ( p2.x - p1.x ),2) + pow( ( p2.y - p1.y ), 2) );
+
+    return distancia;
+
 }
