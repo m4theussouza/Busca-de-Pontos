@@ -25,7 +25,9 @@ void removeDadaPosicao(TListaPonto *lista, int posicao);
 void pontosAleatorios(TListaPonto *lista);
 float pitagoras(TPonto, TPonto);
 void distanciaEntrePontos(TListaPonto*,TPonto,int);
-
+void insercao(float vetor[], int N);
+void ordena(TListaPonto *v, int n);
+void compara(TListaPonto *vOrdenado, TPonto p, TPonto pontoV, int kpontos );
 
 int main(void){
     // declarando Lista de Pontos;
@@ -52,6 +54,9 @@ int main(void){
             scanf("%d,%d",&p.x,&p.y);
             printf("\nlista de pontos:");
             insereFinal(lista,p);
+
+            imprimeListaPontos(lista);  
+
         }
         if( opc == '2'){
             TPonto p;
@@ -102,7 +107,7 @@ int main(void){
 TListaPonto *Init( int N ){
 
     TListaPonto *lista;
-
+    float listaDistancia;
 
     lista = (TListaPonto*) calloc(1,sizeof(TListaPonto));
     lista->qtdAtual = 0;
@@ -113,6 +118,7 @@ TListaPonto *Init( int N ){
 
     return lista;
 }
+
 // Função desaloca a memoria utilizada por *listaPontos
 void Desaloca( TListaPonto *lista){
     // libera o vetor
@@ -161,7 +167,6 @@ void removeDadaPosicao(TListaPonto *lista, int posicao){
 
     lista->qtdAtual--;
 
-    imprimeListaPontos(lista);
  
 }
 
@@ -169,26 +174,40 @@ void pontosAleatorios(TListaPonto *lista){
         int i;
         srand((unsigned)time(NULL));
         for(i=lista->qtdAtual; i < lista->maximo; i++){
-        lista->elementos[i].x = rand() % 1000;
-        lista->elementos[i].y = rand() % 1000;
-        (lista->qtdAtual)++;
+            lista->elementos[i].x = rand() % 1000;
+            lista->elementos[i].y = rand() % 1000;
+            (lista->qtdAtual)++;
         }
 }
 
 void distanciaEntrePontos(TListaPonto *lista, TPonto p, int kpontos){
     int i; 
 
-    TListaPonto *vetorDistancia;
-     
-    vetorDistancia = Init(kpontos);
-    
-    float distancia;
+    float *listaDistancia;
 
-    for(i = 0; i < lista->qtdAtual; i++)
-    
-    vetorDistancia[i] = pitagoras(p,lista->elementos[i]);
+    TListaPonto *mProx;
 
-    printf("Distancia  = %lf\n", distancia);
+    mProx = Init(kpontos);
+
+    listaDistancia = (float*) calloc(kpontos,sizeof(float));
+        
+
+    for(i = 0; i < kpontos; i++){
+        mProx->elementos[i].x = lista->elementos[i].x;
+        mProx->elementos[i].y = lista->elementos[i].y;
+    
+
+    }
+       
+    ordena(mProx, 3);
+    
+    for(i=0; i<lista->qtdAtual;i++)
+        //compara distancias
+        compara(mProx,p,lista->elementos[i],kpontos);
+
+    for(i = 0; i < kpontos  ; i++)
+
+        printf("x = %d; y = %d\n", mProx->elementos[i].x, mProx->elementos[i].y);
 }
     
 
@@ -201,3 +220,63 @@ float pitagoras(TPonto p1, TPonto p2){
     return distancia;
 
 }
+
+void ordena(TListaPonto *v, int n){
+
+    int i , j;
+    TPonto P;
+    P.x = 0;
+    P.y = 0;
+
+    TPonto temp;
+
+    float ponto1, ponto2;
+
+    
+    for(i = n-1; i>= 1; i--){
+      
+        for(j = 0; j<i ; j++){
+          
+            ponto1 = pitagoras(P, v->elementos[j]);
+            
+            ponto2 = pitagoras(P, v->elementos[j+1]);
+            
+            if(ponto1 > ponto2){
+                
+                temp.x = v->elementos[j].x;
+                temp.y = v->elementos[j].y;
+               
+                v->elementos[j].x = v->elementos[j+1].x;
+                v->elementos[j].y = v->elementos[j+1].y;
+               
+                v->elementos[j+1].x = temp.x;
+                v->elementos[j+1].y = temp.y;
+            }
+        }
+    }
+
+}
+
+void compara(TListaPonto *vOrdenado, TPonto p, TPonto pontoV, int kpontos ){
+
+    float ponto1, ponto2;
+   
+    ponto1 = pitagoras(p, vOrdenado->elementos[kpontos-1]);
+   
+    ponto2 = pitagoras(p, pontoV);
+    
+    if(ponto1 > ponto2){
+      
+        vOrdenado->elementos[kpontos-1].x= pontoV.x;
+        vOrdenado->elementos[kpontos-1].y= pontoV.y;
+     
+        ordena(vOrdenado,kpontos);
+    
+    }else{
+     
+        printf("E maior que o ultimo nao entra no vetor\n");
+    }
+}
+
+
+
